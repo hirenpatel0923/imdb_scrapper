@@ -1,4 +1,4 @@
-from imdb.imdb_movie.imdb_movie import ImdbMovie
+from imdb.imdb_movie import ImdbMovie
 
 title = 'tt0082971'
 
@@ -32,6 +32,6 @@ for genre in imdb_title.genres:
     print(genre + ' ')
 print(',')
 
-for cast in imdb_title.get_cast_list():
+for cast in imdb_title.get_cast_list_top(5):
     print(cast + ' ')
 print(',')
