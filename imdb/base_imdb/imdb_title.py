@@ -6,7 +6,7 @@ class IMDBTitle():
         self.url = None
         self.title = None
         self.page_soup = None
-
+        
         if url != None:
             self.url = url
             self.get_title_from_url()
@@ -14,6 +14,28 @@ class IMDBTitle():
         if title != None:
             self.title = title
             self.get_url_from_title()
+        
+        self.title_name = ''
+        self.ratings = 0.0
+        self.genres = []
+        self.plot_keywords = []
+        self.url_fullcredits = 'https://www.imdb.com/title/' + self.title + '/fullcredits'
+        self.director = []
+        self.writtenby = []
+        self.cast_list = []
+        self.credits_flags = {'Directed': False,
+                              'Writing': False,
+                              'Cast': False,
+                              'Produced': False,
+                              'Music': False,
+                              'Cinematography': False,
+                              'Film': False,
+                              'Art': False,
+                              'Makeup': False,
+                              'Production': False,
+                              'Sound': False,
+                              'Camera': False,
+                              }
 
         self.generate_page_soup()
 

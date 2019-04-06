@@ -4,27 +4,20 @@ from decimal import Decimal
 from imdb.base_imdb.imdb_title import IMDBTitle
 
 class ImdbMovie(IMDBTitle):
-    def __init__(self, url=None, title=None):
-        self.title_name = ''
-        self.ratings = 0.0
-        self.genres = []
-        self.plot_keywords = []
-        self.plot_keywords_number = 5
-
-        self.url_fullcredits = 'https://www.imdb.com/title/' + self.title + '/fullcredits'
-        self.director = []
-        self.writtenby = []
-        self.cast_list = []
-        self.cast_list_number = 5
-
-        self.get_title()
+    def __init__(self, url=None, title=None, credit_flags = None):
+        super(ImdbMovie, self).__init__(url=url, title=title)
+        
+        if credit_flags != None:
+            self.credits_flags = credit_flags
+        
+        self.get_title_name()
         self.get_ratings()
         self.get_genres()
         self.get_plot_keywords()
         self.get_full_credits()
 
 
-    def get_title(self):
+    def get_title_name(self):
         title_with_year = self.page_soup.select('h1')[0]
         title_with_year.find('span').decompose()
         self.title_name = title_with_year.text.strip()
@@ -66,11 +59,7 @@ class ImdbMovie(IMDBTitle):
 
         return self.plot_keywords
 
-    def get_full_credits(self, 
-                         isDirector=True, 
-                         isWritenby=True, 
-                         isCastList=True):
-        
+    def get_full_credits(self):  
         credits_page = requests.get(self.url_fullcredits)
         if credits_page.status_code == 200:
             credits_page_soup = BeautifulSoup(credits_page.text, 'html.parser')
@@ -79,23 +68,36 @@ class ImdbMovie(IMDBTitle):
             all_h4 = credits_div.find_all('h4')
             all_table = credits_div.find_all('table')
             
-            if isDirector:
-                table = all_table[0]
-                self.director = self.get_credits_from_table(table, 'director')
+            order_dict = {}
+            count = 0
+            keys = self.credits_flags.keys()
+            keys = list(keys)
+            for h4 in all_h4:
+                text = h4.text.strip()
+                for key in keys:
+                    if key in text:
+                        order_dict[key] = count
+                        keys.remove(key)
+                count += 1
 
-            if isWritenby:
-                table = all_table[1]
-                self.writtenby = self.get_credits_from_table(table, 'writer')
+            if self.credits_flags['Directed']:
+                table = all_table[order_dict['Directed']]
+                self.director = self.get_credits_from_table(table, '')
 
-            if isCastList:
-                table = all_table[2]
+            if self.credits_flags['Writing']:
+                table = all_table[order_dict['Writing']]
+                self.writtenby = self.get_credits_from_table(table, '')
+
+            if self.credits_flags['Cast']:
+                table = all_table[order_dict['Cast']]
                 self.cast_list = self.get_credits_from_table(table, 'cast_list')
                 
 
     def get_credits_from_table(self, table, credit_type):
         lst = []
         trs = table.find_all('tr')
-        del trs[0]
+        if credit_type == 'cast_list':
+            del trs[0]
         for tr in trs:
             tds = tr.find_all('td')
             if len(tds) > 1:
@@ -109,11 +111,15 @@ class ImdbMovie(IMDBTitle):
         return lst
 
 
-    def get_cast_list(self):
-        return self.cast_list[0:self.cast_list_number]
+    def get_cast_list_top(self, top):
+        if len(self.cast_list) < top:
+            return self.cast_list
+        return self.cast_list[0:top]
 
-    def get_plot_keywords_list(self):
-        return self.plot_keywords[0:self.plot_keywords_number]
+    def get_plot_keywords_list_top(self, top):
+        if len(self.plot_keywords) < top:
+            return self.plot_keywords
+        return self.plot_keywords[0:top]
 
 
     
