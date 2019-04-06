@@ -4,7 +4,7 @@ import pandas as pd
 import multiprocessing
 import concurrent.futures
 from TorCrawler import TorCrawler
-from imdb_title import ImdbTitle
+from imdb.imdb_movie.imdb_movie import ImdbMovie
 
 def get_title(process_name, page_soup, url):
     all_link = page_soup.find_all('a', href=True)
@@ -15,7 +15,7 @@ def get_title(process_name, page_soup, url):
                 split_link = link['href'].split('/')
 
                 if split_link[2] not in lst:  #check for duplicate title
-                    imdb_title = ImdbTitle(title=split_link[2])
+                    imdb_title = ImdbMovie(title=split_link[2])
                     lst.append(imdb_title.title)
                     f.write(imdb_title.title + ',' +
                             imdb_title.title_name + ',' +

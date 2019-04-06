@@ -1,22 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 from decimal import Decimal
+from imdb.base_imdb.imdb_title import IMDBTitle
 
-class ImdbTitle():
+class ImdbMovie(IMDBTitle):
     def __init__(self, url=None, title=None):
-        self.url = None
-        self.page_soup = None
-        self.title = None
-
-        if url != None:
-            self.url = url
-            self.get_title_from_url()
-
-        if title != None:
-            self.title = title
-            self.get_url_from_title()
-
-
         self.title_name = ''
         self.ratings = 0.0
         self.genres = []
@@ -29,31 +17,12 @@ class ImdbTitle():
         self.cast_list = []
         self.cast_list_number = 5
 
-
-
-        self.generate_page_soup()
         self.get_title()
         self.get_ratings()
         self.get_genres()
         self.get_plot_keywords()
         self.get_full_credits()
 
-
-    def generate_page_soup(self):
-        if self.url != None:
-            page = requests.get(self.url)
-            self.page_soup = BeautifulSoup(page.text, 'html.parser')
-            return True
-        else:
-            return False
-
-    def get_title_from_url(self):
-        self.title = self.url.split('/')[4]
-        return self.title
-
-    def get_url_from_title(self):
-        self.url = 'http://www.imdb.com/title/' + self.title
-        return self.url
 
     def get_title(self):
         title_with_year = self.page_soup.select('h1')[0]
